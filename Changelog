@@ -1,0 +1,6 @@
+Changes for rndpassw-0.2.1 (22 September 2015)
+    * small fixes
+
+Changes for rndpassw-0.2 (01 March 2014)
+    * the code is fully rewrited
+    * for build project use cmake

@@ -1,0 +1,39 @@
+.\"
+.Dd September 22, 2015
+.Dt RNDPASS 1
+.Os
+.Sh NAME
+.Nm rndpassw
+.Nd generate random passwords
+.Sh SYNOPSIS
+.Nm
+.Op Fl dulpshv
+.Op Ar password length
+.Op Ar password count
+.Sh DESCRIPTION
+The
+.Nm
+utility generate random passwords
+.Pp
+The following options are available:
+.Bl -tag -width indent
+.It Fl d
+password contain numeric characters [0-9]
+.It Fl u
+password contain upper alpha characters [A-Z]
+.It Fl l
+password contain lower alpha characters [a-z]
+.It Fl p
+password contain printable charcaters
+.It Fl s
+password contain all previous characters groups
+.It Fl v
+print version
+.It Fl h
+print short usage
+.Sh EXIT STATUS
+.Ex -std
+.Sh AUTHOR
+Andrew Romanenko <melanhit@gmail.com>
+.Sh SITE
+https://github.com/melanhit/rndpassw
