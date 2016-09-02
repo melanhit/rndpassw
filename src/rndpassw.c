@@ -59,11 +59,13 @@ static void print_version(void)
 int main(int argc, char **argv)
 {
     flags_t flags = { 0 };
-    ssize_t passlen = -1, passcnt = -1;
-    int opt, mixlen = 0, entlen, fd;
-    size_t i, y, baselen = 0;
-    char *mixbuf, *mixoff, t;
-    unsigned char *entbuf, *entoff, *passbuf;
+    size_t passlen, passcnt;
+    size_t baselen, mixlen, entlen;
+    int i, j, opt, fd, ret;
+    char t, *mixoff, *mixbuf = NULL;
+    unsigned char *entoff, *entbuf = NULL, *passbuf = NULL;
+
+    ret = EXIT_SUCCESS;
 
     /* parse command options */
     while((opt = getopt(argc, argv, "dlupshv")) != -1) {
@@ -111,6 +113,7 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
+    passlen = 0;
     if(optind < argc) {
         passlen = strtol(argv[optind], NULL, 10);
         if((passlen > MAX_PASSLEN) || (passlen < MIN_PASSLEN)) {
@@ -120,6 +123,7 @@ int main(int argc, char **argv)
         optind++;
     }
 
+    passcnt = 0;
     if(optind < argc) {
         passcnt = strtol(argv[optind], NULL, 10);
         if((passcnt > MAX_PASSCNT) || (passcnt <= 0)) {
@@ -129,10 +133,10 @@ int main(int argc, char **argv)
         optind++;
     }
 
-    if(passlen == -1)
+    if(!passlen)
         passlen = DEF_PASSLEN;
 
-    if(passcnt == -1)
+    if(!passcnt)
         passcnt = DEF_PASSCNT;
 
     /* if no options - set default */
@@ -141,6 +145,7 @@ int main(int argc, char **argv)
     }
 
     /* prepear parts for calc dirctionary length */
+    baselen = 0;
     if(flags.p) {
         baselen = TBL_PUNCT_LEN;
     }
@@ -178,23 +183,23 @@ int main(int argc, char **argv)
 
     entoff = entbuf = malloc(entlen);
     if(entbuf == NULL) {
-        fprintf(stderr, "Could not allocate %d bytes\n", entlen);
-        return EXIT_FAILURE;
+        fprintf(stderr, "Could not allocate %zd bytes\n", entlen);
+        ret = EXIT_FAILURE;
+        goto out;
     }
 
     if(read(fd, entbuf, entlen) != entlen) {
-        fprintf(stderr, "Could not read %d bytes from /dev/urandom\n", entlen);
-        close(fd);
-        return EXIT_FAILURE;
+        fprintf(stderr, "Could not read %zd bytes from /dev/urandom\n", entlen);
+        ret = EXIT_FAILURE;
+        goto out;
     }
-
-    close(fd);
 
     /* create and fill dictionary */
     mixbuf = malloc(mixlen);
     if(mixbuf == NULL) {
-        fprintf(stderr, "Could not allocate %d bytes of memory\n", mixlen);
-        return EXIT_FAILURE;
+        fprintf(stderr, "Could not allocate %zd bytes of memory\n", mixlen);
+        ret = EXIT_FAILURE;
+        goto out;
     }
 
     /* digit */
@@ -225,8 +230,8 @@ int main(int argc, char **argv)
     memcpy(mixoff, tbl_punct, TBL_PUNCT_LEN * flags.p);
 
     /* double randomize dictionary */
-    for(i = 0, mixoff = mixbuf; i < (unsigned)(mixlen * 2); i++) {
-        if(i == (unsigned)mixlen)
+    for(i = 0, mixoff = mixbuf; i < (mixlen * 2); i++) {
+        if(i == mixlen)
             mixoff = mixbuf;
 
         t = mixoff[0];
@@ -239,17 +244,21 @@ int main(int argc, char **argv)
     passbuf = calloc(passlen + 1, 1);
     if(passbuf == NULL) {
         fprintf(stderr, "Could not allocate %zd bytes\n", passlen + 1);
-        return EXIT_FAILURE;
+        ret = EXIT_FAILURE;
+        goto out;
     }
 
-    for(i = 0; i < (unsigned)passcnt; i++) {
-        for(y = 0; y < (unsigned)passlen; y++) {
-            passbuf[y] = mixbuf[entoff[0] % mixlen];
-            entoff++;
-        }
+    for(i = 0; i < passcnt; entoff += passlen, i++) {
+        for(j = 0; j < passlen; j++)
+            passbuf[j] = mixbuf[entoff[j] % mixlen];
 
         printf("%s\n", passbuf);
     }
+
+out:
+    /* close /dev/urandom */
+    if(fd != -1)
+        close(fd);
 
     /* clean allocated buffers */
     if(mixbuf != NULL) {
@@ -267,5 +276,5 @@ int main(int argc, char **argv)
         free(passbuf);
     }
 
-    return (EXIT_SUCCESS);
+    return ret;
 }
