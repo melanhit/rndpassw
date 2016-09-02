@@ -36,7 +36,7 @@
 #define DEF_PASSLEN 10
 #define DEF_PASSCNT 4
 
-#define VERSION     "0.2"
+#define VERSION     "0.2.1"
 
 typedef struct {
     char d;

@@ -28,6 +28,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -36,6 +37,14 @@
 #include <rndpassw.h>
 
 #include "table.h"
+
+static void memzero(volatile void *p, size_t len)
+{
+    volatile uint8_t *_p = p;
+
+    while(len--)
+        *_p++=0;
+}
 
 static void print_usage(void)
 {
@@ -243,15 +252,20 @@ int main(int argc, char **argv)
     }
 
     /* clean allocated buffers */
-    if(mixbuf != NULL)
+    if(mixbuf != NULL) {
+        memzero(mixbuf, mixlen);
         free(mixbuf);
+    }
 
-    if(entbuf != NULL)
+    if(entbuf != NULL) {
+        memzero(entbuf, entlen);
         free(entbuf);
+    }
 
-    if(passbuf != NULL)
+    if(passbuf != NULL) {
+        memzero(passbuf, passlen + 1);
         free(passbuf);
+    }
 
-    return (0);
+    return (EXIT_SUCCESS);
 }
-
