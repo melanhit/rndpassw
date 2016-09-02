@@ -1,5 +1,5 @@
 /*
- *   Copyright (c) 2015, Andrew Romanenko <melanhit@gmail.com>
+ *   Copyright (c) 2015-2016, Andrew Romanenko <melanhit@gmail.com>
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@
 
 static void print_usage(void)
 {
-    fprintf(stderr,"Usage: rndpassw [-dlupsh] <passlen> <passcnt>\n");
+    fprintf(stderr,"Usage: rndpassw [-dulpsvh] <passlen> <passcnt>\n");
 }
 
 static void print_version(void)
