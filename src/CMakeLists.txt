@@ -3,8 +3,7 @@ set(src
 
 list(SORT src)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -DPIC -std=c90 -Wall -Werror -Wmissing-prototypes")
-
 add_executable(rndpassw ${src})
+target_compile_options(rndpassw PUBLIC -fPIC -ansi -Wall)
 install(TARGETS rndpassw
         RUNTIME DESTINATION bin)
